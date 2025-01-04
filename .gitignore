@@ -1,5 +1,5 @@
-backend/obj/
 .vs/
+.vscode/
 backend/bin/
 backend/obj/
 frontend/.vscode/
