@@ -1,51 +1,27 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './NoteDisplay.css';
+import Toolbar from './Toolbar';
+import { applyBlockType } from '../utils/blockUtils';
 
 function NoteDisplay({ note }) {
-  const [isEditing, setIsEditing] = useState(false);
   const contentRef = useRef(null);
-  const titleRef = useRef(null);
 
-  // Sync note content and title with the DOM when note changes
   useEffect(() => {
     if (contentRef.current) {
-      contentRef.current.innerText = note?.content || '';
-    }
-    if (titleRef.current) {
-      titleRef.current.innerText = note?.title || 'Untitled Note';
+      contentRef.current.innerHTML = note?.content || '';
     }
   }, [note]);
-
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleBlur = () => {
-    setIsEditing(false);
-    console.log('Edited title:', titleRef.current.innerText);
-    console.log('Edited content:', contentRef.current.innerText);
-  };
 
   return (
     <div className="note-display">
       {note ? (
         <div>
-          <div
-            ref={titleRef}
-            contentEditable={true}
-            suppressContentEditableWarning={true}
-            onBlur={handleBlur}
-            className="editable-title"
-          />
-          <p style={{ fontSize: '0.9em', color: '#bbb' }}>
-            {new Date(note.createdAt).toLocaleString()}
-          </p>
+          <Toolbar onApplyBlockType={(tag) => applyBlockType(tag, contentRef)} />
+          <h3 contentEditable className="editable-title">{note.title}</h3>
           <div
             ref={contentRef}
-            contentEditable={isEditing}
-            suppressContentEditableWarning={true}
-            onClick={handleEdit}
-            onBlur={handleBlur}
+            contentEditable
+            suppressContentEditableWarning
             className="editable-content"
           />
         </div>
