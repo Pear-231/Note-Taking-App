@@ -1,0 +1,19 @@
+.note-display {
+    flex-grow: 1;
+    padding: 40px 40px 40px 48px;
+    background-color: #181818;
+    overflow-y: auto;
+    border-left: none;
+    border-radius: 12px;
+  }
+  
+  .note-display h3 {
+    font-size: 1.8em;
+  }
+  
+  .note-display p {
+    font-size: 1.1em;
+    line-height: 1.8;
+    color: #ddd;
+  }
+  

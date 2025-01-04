@@ -1,0 +1,12 @@
+backend/obj/backend.csproj.nuget.dgspec.json
+backend/obj/backend.csproj.nuget.g.props
+backend/obj/backend.csproj.nuget.g.targets
+backend/obj/project.assets.json
+backend/obj/project.nuget.cache
+backend/obj/Debug/net9.0/.NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+backend/obj/Debug/net9.0/backend.AssemblyInfo.cs
+backend/obj/Debug/net9.0/backend.AssemblyInfoInputs.cache
+backend/obj/Debug/net9.0/backend.assets.cache
+backend/obj/Debug/net9.0/backend.csproj.AssemblyReference.cache
+backend/obj/Debug/net9.0/backend.GeneratedMSBuildEditorConfig.editorconfig
+backend/obj/Debug/net9.0/backend.GlobalUsings.g.cs

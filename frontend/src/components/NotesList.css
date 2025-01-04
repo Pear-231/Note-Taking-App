@@ -1,0 +1,29 @@
+.notes-list {
+    width: 15%;
+    padding: 10px;
+  }
+  
+  .note-item {
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .note-item:hover {
+    background-color: #292929;
+  }
+  
+  .note-item.active {
+    background-color: #3a3a3a;
+  }
+  
+  .note-preview {
+    font-size: 0.85em;
+    color: #bbb;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
