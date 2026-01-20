@@ -1,0 +1,42 @@
+{
+	"folders": [
+		{
+			"path": ".",
+		},
+	],
+	"settings": {
+		"eslint.workingDirectories": [
+			{
+				"mode": "auto",
+			},
+		],
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"[typescript]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode",
+		},
+		"[typescriptreact]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode",
+		},
+		"[javascript]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode",
+		},
+		"[javascriptreact]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode",
+		},
+		"files.exclude": {
+			"**/.github": true,
+			"**/.vs": true,
+			"**/backend": true,
+			"**/Note-Taking-App.sln": true,
+			"**/frontend/.vite": true,
+			"**/node_modules": true,
+		},
+		"editor.formatOnSave": true,
+		"editor.detectIndentation": false,
+		"prettier.singleAttributePerLine": true,
+		"prettier.bracketSameLine": true,
+		"prettier.tabWidth": 4,
+		"prettier.proseWrap": "preserve",
+		"prettier.useTabs": true,
+	},
+}
