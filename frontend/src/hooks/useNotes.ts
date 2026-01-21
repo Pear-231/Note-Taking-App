@@ -3,13 +3,13 @@ import { NotesApi } from "../api/notesApi";
 import type { Note } from "../models/note";
 
 export function useNotes() {
-	// Declare React state:
+	// Declare React state from the array returned from useState
 	// - notes is the current list of notes stored by React
 	// - setNotes is the function React provides to replace that list
 	const [notes, setNotes] = useState<Note[]>([]);
 
 	// After the first render:
-	// - get the notes
+	// - get the notes (asynchronously)
 	// - pass the returned list into setNotes to update the state
 	useEffect(() => {
 		NotesApi.getNotesAsync().then(setNotes);

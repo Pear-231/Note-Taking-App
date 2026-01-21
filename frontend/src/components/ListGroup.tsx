@@ -1,16 +1,23 @@
-import { useNotes } from "../hooks/useNotes";
+import type { Note } from "../models/note";
+import ListGroupItem from "./ListGroupItem";
 
-function ListGroup() {
-	const notes = useNotes();
-	const listItems = notes.map((note) => (
-		<li
-			className="list-group-item"
-			key={note.id}>
-			{note.title}
-		</li>
-	));
-	const list = <ul className="list-group">{listItems}</ul>;
-	return list;
+export interface Properties {
+	notes: Note[];
+	onSelect: (item: Note) => void;
+}
+
+function ListGroup({ notes, onSelect }: Properties) {
+	return (
+		<ul className="list-group">
+			{notes.map((note) => (
+				<ListGroupItem
+					key={note.id}
+					note={note}
+					onSelect={onSelect}
+				/>
+			))}
+		</ul>
+	);
 }
 
 export default ListGroup;
