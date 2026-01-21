@@ -38,5 +38,6 @@
 		"prettier.tabWidth": 4,
 		"prettier.proseWrap": "preserve",
 		"prettier.useTabs": true,
+		"prettier.printWidth": 150,
 	},
 }
