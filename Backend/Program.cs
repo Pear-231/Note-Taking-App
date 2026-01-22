@@ -1,4 +1,4 @@
-using backend.Data;
+using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
