@@ -26,7 +26,7 @@
 		"files.exclude": {
 			"**/.github": true,
 			"**/.vs": true,
-			"**/backend": true,
+			"**/Backend": true,
 			"**/Note-Taking-App.sln": true,
 			"**/frontend/.vite": true,
 			"**/node_modules": true,

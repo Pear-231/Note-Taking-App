@@ -1,4 +1,4 @@
-import { NotesExplorerTree } from "./components/NotesExplorer/NotesExplorerTree";
+import { NotesExplorerTree } from "./notesExplorer/components/NotesExplorerTree";
 
 function App() {
 	return (

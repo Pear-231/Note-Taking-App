@@ -1,173 +1,123 @@
 ﻿using Backend.Contracts;
 using Backend.Data;
-using Backend.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/tree")]
     public class TreeController(AppDbContext context) : ControllerBase
     {
         private readonly AppDbContext _context = context;
 
-        private const string RootTreeId = "root";
-
-        private static string GetFolderTreeId(Guid folderId) => $"folder:{folderId}";
-
-        private static string GetNoteTreeId(Guid noteId) => $"note:{noteId}";
-
-        private static bool TryParseFolderTreeId(string treeItemId, out Guid folderId)
+        [HttpGet("nodes/{nodeId:guid}")]
+        public async Task<ActionResult<TreeNode>> GetNode(Guid nodeId)
         {
-            folderId = default;
+            var folder = await _context.Folders
+                .AsNoTracking()
+                .Select(folderItem => new
+                {
+                    folderItem.Id,
+                    folderItem.Name
+                })
+                .SingleOrDefaultAsync(folderItem => folderItem.Id == nodeId);
 
-            if (!treeItemId.StartsWith("folder:", StringComparison.OrdinalIgnoreCase))
+            if (folder != null)
             {
-                return false;
+                var hasChildFolders = await _context.Folders
+                    .AsNoTracking()
+                    .AnyAsync(childFolder => childFolder.ParentId == nodeId);
+
+                var hasChildNotes = await _context.Notes
+                    .AsNoTracking()
+                    .AnyAsync(childNote => childNote.ParentId == nodeId);
+
+                var hasChildren = hasChildFolders || hasChildNotes;
+
+                return Ok(TreeNode.Create(folder.Id, folder.Name, hasChildren));
             }
 
-            var guidString = treeItemId["folder:".Length..];
-            return Guid.TryParse(guidString, out folderId);
+            var note = await _context.Notes
+                .AsNoTracking()
+                .Select(noteItem => new
+                {
+                    noteItem.Id,
+                    noteItem.Name
+                })
+                .SingleOrDefaultAsync(noteItem => noteItem.Id == nodeId);
+
+            if (note != null)
+                return Ok(TreeNode.Create(note.Id, note.Name));
+
+            return NotFound();
         }
 
-        private static bool TryParseNoteTreeId(string treeItemId, out Guid noteId)
+        [HttpGet("nodes/children")]
+        public async Task<ActionResult<TreeNode[]>> GetChildren([FromQuery] Guid? parentId)
         {
-            noteId = default;
-
-            if (!treeItemId.StartsWith("note:", StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            var guidString = treeItemId["note:".Length..];
-            return Guid.TryParse(guidString, out noteId);
-        }
-
-        [HttpGet("items/{treeItemId}")]
-        public async Task<ActionResult<TreeNode>> GetItem(string treeItemId)
-        {
-            if (string.Equals(treeItemId, RootTreeId, StringComparison.OrdinalIgnoreCase))
-            {
-                var rootHasChildren =
-                    await _context.Folders.AsNoTracking().AnyAsync(folder => folder.ParentId == null) ||
-                    await _context.Notes.AsNoTracking().AnyAsync(note => note.ParentId == null);
-
-                return Ok(new TreeNode
+            var childFolders = await _context.Folders
+                .AsNoTracking()
+                .Where(folderItem => folderItem.ParentId == parentId)
+                .OrderBy(folderItem => folderItem.Name)
+                .Select(folderItem => new
                 {
-                    Id = RootTreeId,
-                    Name = "Notes",
-                    IsFolder = true,
-                    HasChildren = rootHasChildren
-                });
-            }
+                    folderItem.Id,
+                    folderItem.Name
+                })
+                .ToListAsync();
 
-            if (TryParseFolderTreeId(treeItemId, out var folderId))
-            {
-                var folder = await _context.Folders
-                    .AsNoTracking()
-                    .Where(folderItem => folderItem.Id == folderId)
-                    .Select(folderItem => new
-                    {
-                        folderItem.Id,
-                        folderItem.Name
-                    })
-                    .SingleOrDefaultAsync();
-
-                if (folder == null)
+            var childNotes = await _context.Notes
+                .AsNoTracking()
+                .Where(noteItem => noteItem.ParentId == parentId)
+                .OrderBy(noteItem => noteItem.Name)
+                .Select(noteItem => new
                 {
-                    return NotFound();
-                }
+                    noteItem.Id,
+                    noteItem.Name
+                })
+                .ToListAsync();
 
-                var hasChildren =
-                    await _context.Folders.AsNoTracking().AnyAsync(childFolder => childFolder.ParentId == folderId) ||
-                    await _context.Notes.AsNoTracking().AnyAsync(childNote => childNote.ParentId == folderId);
+            var childFolderIds = childFolders
+                .Select(folderItem => folderItem.Id)
+                .ToList();
 
-                return Ok(new TreeNode
-                {
-                    Id = GetFolderTreeId(folder.Id),
-                    Name = folder.Name ?? string.Empty,
-                    IsFolder = true,
-                    HasChildren = hasChildren
-                });
-            }
+            var parentIdsWithChildFolders = await _context.Folders
+                .AsNoTracking()
+                .Where(folderItem =>
+                    folderItem.ParentId != null &&
+                    childFolderIds.Contains(folderItem.ParentId.Value))
+                .Select(folderItem => folderItem.ParentId!.Value)
+                .Distinct()
+                .ToListAsync();
 
-            if (TryParseNoteTreeId(treeItemId, out var noteId))
-            {
-                var note = await _context.Notes
-                    .AsNoTracking()
-                    .Where(noteItem => noteItem.Id == noteId)
-                    .Select(noteItem => new
-                    {
-                        noteItem.Id,
-                        noteItem.Name
-                    })
-                    .SingleOrDefaultAsync();
+            var parentIdsWithChildNotes = await _context.Notes
+                .AsNoTracking()
+                .Where(noteItem =>
+                    noteItem.ParentId != null &&
+                    childFolderIds.Contains(noteItem.ParentId.Value))
+                .Select(noteItem => noteItem.ParentId!.Value)
+                .Distinct()
+                .ToListAsync();
 
-                if (note == null)
-                {
-                    return NotFound();
-                }
+            var parentIdsWithChildren = parentIdsWithChildFolders
+                .Concat(parentIdsWithChildNotes)
+                .ToHashSet();
 
-                return Ok(new TreeNode
-                {
-                    Id = GetNoteTreeId(note.Id),
-                    Name = note.Name ?? string.Empty,
-                    IsFolder = false,
-                    HasChildren = false
-                });
-            }
+            var folderNodes = childFolders
+                .Select(folderItem => TreeNode.Create(
+                    folderItem.Id,
+                    folderItem.Name,
+                    parentIdsWithChildren.Contains(folderItem.Id)))
+                .ToList();
 
-            return BadRequest($"Unknown tree item id: {treeItemId}");
-        }
+            var noteNodes = childNotes
+                .Select(noteItem => TreeNode.Create(noteItem.Id, noteItem.Name))
+                .ToList();
 
-        [HttpGet("items/{treeItemId}/children")]
-        public async Task<ActionResult<string[]>> GetChildren(string treeItemId)
-        {
-            if (string.Equals(treeItemId, RootTreeId, StringComparison.OrdinalIgnoreCase))
-            {
-                var topLevelFolderIds = await _context.Folders
-                    .AsNoTracking()
-                    .Where(folder => folder.ParentId == null)
-                    .OrderBy(folder => folder.Name)
-                    .Select(folder => GetFolderTreeId(folder.Id))
-                    .ToListAsync();
-
-                var topLevelNoteIds = await _context.Notes
-                    .AsNoTracking()
-                    .Where(note => note.ParentId == null)
-                    .OrderBy(note => note.Name)
-                    .Select(note => GetNoteTreeId(note.Id))
-                    .ToListAsync();
-
-                return Ok(topLevelFolderIds.Concat(topLevelNoteIds).ToArray());
-            }
-
-            if (TryParseFolderTreeId(treeItemId, out var folderId))
-            {
-                var childFolderIds = await _context.Folders
-                    .AsNoTracking()
-                    .Where(childFolder => childFolder.ParentId == folderId)
-                    .OrderBy(childFolder => childFolder.Name)
-                    .Select(childFolder => GetFolderTreeId(childFolder.Id))
-                    .ToListAsync();
-
-                var childNoteIds = await _context.Notes
-                    .AsNoTracking()
-                    .Where(childNote => childNote.ParentId == folderId)
-                    .OrderBy(childNote => childNote.Name)
-                    .Select(childNote => GetNoteTreeId(childNote.Id))
-                    .ToListAsync();
-
-                return Ok(childFolderIds.Concat(childNoteIds).ToArray());
-            }
-
-            if (TryParseNoteTreeId(treeItemId, out _))
-            {
-                return Ok(Array.Empty<string>());
-            }
-
-            return BadRequest($"Unknown tree item id: {treeItemId}");
+            return folderNodes
+                .Concat(noteNodes)
+                .ToArray();
         }
     }
 }
