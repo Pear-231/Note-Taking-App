@@ -4,7 +4,7 @@ namespace Backend.Data
 {
     public static class DummyDb
     {
-        public static void Initialize(AppDbContext context)
+        public static void Initialise(AppDbContext context)
         {
             if (context.Folders.Any() || context.Notes.Any())
                 return;

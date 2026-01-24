@@ -14,10 +14,10 @@ export function NotesExplorerTree() {
 		rootItemId: NotesExplorerTreeBuilder.rootNodeId,
 		getItemName: (item) => item.getItemData().name,
 		isItemFolder: (item) => item.getId() === NotesExplorerTreeBuilder.rootNodeId || item.getItemData().isFolder(),
-		createLoadingItemData: () => notesExplorerTreeBuilder.createLoadingItemData(),
+		createLoadingItemData: () => notesExplorerTreeBuilder.createLoadingNodeData(),
 		dataLoader: {
-			getItem: (treeItemId) => notesExplorerTreeBuilder.getNode(treeItemId),
-			getChildren: (treeItemId) => notesExplorerTreeBuilder.getChildren(treeItemId),
+			getItem: (nodeId) => notesExplorerTreeBuilder.getNode(nodeId),
+			getChildren: (nodeId) => notesExplorerTreeBuilder.getChildren(nodeId),
 		},
 		indent: 20,
 		features: [asyncDataLoaderFeature, selectionFeature, hotkeysCoreFeature],

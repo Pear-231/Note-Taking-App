@@ -1,6 +1,4 @@
-﻿using Backend.Data.Entities;
-
-namespace Backend.Contracts
+﻿namespace Backend.Contracts
 {
     public enum TreeNodeType
     {
